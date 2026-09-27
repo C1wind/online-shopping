@@ -1,0 +1,13 @@
+node_modules/
+.DS_Store
+*.log
+docs/report-render/
+
+# —— 按六周计划分批公开（每周解除一行并提交）——
+docs/202230440186_陈峰.docx
+docs/202230440186_陈峰.pdf
+docs/Git-小白操作手册.md
+docs/交付物清单与进度安排.md
+docs/diagrams/
+docs/screenshots/
+docs/report-build/

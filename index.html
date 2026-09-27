@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>拾光优选 · 品质购物</title>
+  <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+  <!-- 顶部工具条 -->
+  <div class="topline">
+    <div class="wrap topline-inner">
+      <div class="topline-left">
+        <span id="greet-text">欢迎来到拾光优选</span>
+        <span class="dot">·</span>
+        <a href="#" data-nav="home">首页</a>
+      </div>
+      <div class="topline-right">
+        <a href="#" data-nav="login" id="link-login">亲，请登录</a>
+        <a href="#" data-nav="register" id="link-register">免费注册</a>
+        <a href="#" data-nav="orders">我的订单</a>
+        <a href="#" data-nav="admin" id="link-admin" hidden>商家后台</a>
+        <button class="linkish" id="btn-logout" hidden>退出</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 主头：Logo + 搜索 + 购物车 -->
+  <header class="masthead">
+    <div class="wrap masthead-inner">
+      <a class="logo" href="#" data-nav="home">
+        <span class="logo-mark">拾</span>
+        <span class="logo-text">
+          <strong>拾光优选</strong>
+          <small>SHIGUANG SELECT</small>
+        </span>
+      </a>
+
+      <div class="searchbar">
+        <div class="search-tabs">
+          <button class="stab active" data-stab="all">宝贝</button>
+          <button class="stab" data-stab="shop">店铺</button>
+        </div>
+        <div class="search-field">
+          <input id="global-search" type="search" placeholder="搜索商品名称、分类，如：耳机 / 数码" autocomplete="off" />
+          <button class="btn-search" id="btn-search" aria-label="搜索">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <span>搜一下</span>
+          </button>
+        </div>
+        <div class="hot-words">
+          <span>热搜：</span>
+          <a href="#" data-hot="耳机">耳机</a>
+          <a href="#" data-hot="MacBook">MacBook</a>
+          <a href="#" data-hot="咖啡">咖啡机</a>
+          <a href="#" data-hot="图书">图书</a>
+        </div>
+      </div>
+
+      <button class="cart-entry" id="btn-cart" aria-label="购物车">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M3 4h2l2.4 11h10.2L20 7H7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="19" r="1.5" fill="currentColor"/><circle cx="17" cy="19" r="1.5" fill="currentColor"/></svg>
+        <span>购物车</span>
+        <em class="cart-badge" id="cart-badge">0</em>
+      </button>
+    </div>
+  </header>
+
+  <!-- 频道导航 -->
+  <nav class="channel">
+    <div class="wrap channel-inner">
+      <button class="chan-all" id="btn-all-cats">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="4" width="7" height="7" rx="1.5"/><rect x="14" y="4" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        全部商品分类
+      </button>
+      <div class="chan-links" id="channel-cats"></div>
+    </div>
+  </nav>
+
+  <main class="wrap main" id="app">
+    <!-- ========== 首页 ========== -->
+    <section id="view-home" class="view">
+      <div class="hero">
+        <div class="hero-copy">
+          <p class="hero-kicker">秋季焕新 · 品质直达</p>
+          <h1>把好物，<br/>带回家</h1>
+          <p class="hero-sub">精选数码、家电、运动与图书，全场满 99 包邮，下单即发确认邮件。</p>
+          <div class="hero-actions">
+            <button class="btn primary lg" data-nav="products">立即逛逛</button>
+            <button class="btn ghost lg" id="btn-hero-cats">按分类选购</button>
+          </div>
+          <div class="hero-stats">
+            <div><strong id="stat-sku">0</strong><span>在售商品</span></div>
+            <div><strong>24h</strong><span>极速发货</span></div>
+            <div><strong>7天</strong><span>无忧退换</span></div>
+          </div>
+        </div>
+        <div class="hero-stage" id="hero-stage"></div>
+      </div>
+
+      <div class="section-head">
+        <h2>今日精选</h2>
+        <a href="#" data-nav="products">查看全部 →</a>
+      </div>
+      <div class="grid products" id="home-products"></div>
+
+      <!-- 个性化推荐（基于物品的协同过滤，登录后显示） -->
+      <div class="section-head" id="home-rec-head" hidden>
+        <h2>猜你喜欢 <small class="muted">· 根据你的浏览与购买记录推荐</small></h2>
+      </div>
+      <div class="grid products" id="home-recs" hidden></div>
+
+      <div class="section-head">
+        <h2>按分类逛</h2>
+      </div>
+      <div class="cat-strip" id="home-cats"></div>
+    </section>
+
+    <!-- ========== 商品列表 ========== -->
+    <section id="view-products" class="view" hidden>
+      <div class="page-head">
+        <h2 id="products-title">全部商品</h2>
+        <div class="sort-row">
+          <button class="chip active" data-sort="default">综合</button>
+          <button class="chip" data-sort="price_asc">价格 ↑</button>
+          <button class="chip" data-sort="price_desc">价格 ↓</button>
+        </div>
+      </div>
+      <div class="grid products" id="product-list"></div>
+      <div class="empty" id="product-empty" hidden>
+        <div class="empty-icon">🔍</div>
+        <p>没有找到相关商品</p>
+        <button class="btn" id="btn-clear-search">看看全部商品</button>
+      </div>
+      <div class="pager" id="product-pager">
+        <button class="btn" id="page-prev">上一页</button>
+        <span id="page-info">1</span>
+        <button class="btn" id="page-next">下一页</button>
+      </div>
+    </section>
+
+    <!-- ========== 店铺列表 ========== -->
+    <section id="view-shops" class="view" hidden>
+      <div class="page-head">
+        <h2 id="shops-title">全部店铺</h2>
+        <button class="btn" id="btn-shops-clear">查看全部</button>
+      </div>
+      <div class="shop-list" id="shop-list"></div>
+      <div class="empty" id="shops-empty" hidden>
+        <div class="empty-icon">🏪</div>
+        <p>没有找到相关店铺</p>
+        <button class="btn primary" id="btn-shops-clear">查看全部店铺</button>
+      </div>
+    </section>
+
+    <!-- ========== 店铺主页 ========== -->
+    <section id="view-shop" class="view" hidden>
+      <div class="crumb"><a href="#" data-nav="home">首页</a> / <a href="#" data-nav="shops">店铺</a> / <span id="shop-crumb"></span></div>
+      <div class="shop-banner panel">
+        <div>
+          <h2 id="shop-name">店铺</h2>
+          <p class="muted" id="shop-desc"></p>
+          <p class="muted" id="shop-meta"></p>
+        </div>
+        <button class="btn" id="btn-shop-all">返回商品列表</button>
+      </div>
+      <h3 id="shop-count" style="margin:18px 0 12px">本店商品</h3>
+      <div class="grid products" id="shop-products"></div>
+    </section>
+
+    <!-- ========== 商品详情 ========== -->
+    <section id="view-detail" class="view" hidden>
+      <div class="crumb"><a href="#" data-nav="home">首页</a> / <a href="#" data-nav="products">商品</a> / <span id="detail-crumb"></span></div>
+      <div class="detail">
+        <div class="detail-media" id="detail-media"></div>
+        <div class="detail-info">
+          <p class="badge-row"><span class="badge hot">热卖</span><span class="badge">包邮</span><span class="badge">正品保障</span></p>
+          <p class="shop-link-line" id="detail-shop"></p>
+          <h1 id="detail-name"></h1>
+          <p class="detail-desc" id="detail-desc"></p>
+          <div class="price-panel">
+            <div class="price-main"><span class="yen">¥</span><strong id="detail-price">0</strong></div>
+            <div class="price-meta">
+              <span>销量 <em id="detail-sales">0</em></span>
+              <span>库存 <em id="detail-stock">0</em></span>
+              <span>分类 <em id="detail-cat"></em></span>
+            </div>
+          </div>
+          <div class="qty-row">
+            <span>数量</span>
+            <div class="stepper">
+              <button id="qty-minus">−</button>
+              <input id="qty-input" type="number" min="1" value="1" />
+              <button id="qty-plus">+</button>
+            </div>
+          </div>
+          <div class="detail-actions">
+            <button class="btn warn lg" id="btn-buy-now">立即购买</button>
+            <button class="btn primary lg" id="btn-add-cart">加入购物车</button>
+          </div>
+          <ul class="service-list">
+            <li>✓ 支付后自动发送发货确认邮件</li>
+            <li>✓ 支持 7 天无理由退换</li>
+            <li>✓ 正规发票 · 品质联保</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 推荐位：简单共现推荐 + 协同过滤 -->
+      <div class="rec-block" id="rec-alsobuy-block" hidden>
+        <h3>🛒 浏览过此商品的人也买了</h3>
+        <div class="grid products recs" id="rec-alsobuy"></div>
+      </div>
+      <div class="rec-block" id="rec-cf-block" hidden>
+        <h3>✨ 看了又看 <small class="muted">· 基于物品的协同过滤推荐</small></h3>
+        <div class="grid products recs" id="rec-cf"></div>
+      </div>
+    </section>
+
+    <!-- ========== 购物车 ========== -->
+    <section id="view-cart" class="view" hidden>
+      <div class="page-head"><h2>我的购物车</h2></div>
+      <div class="cart-layout">
+        <div class="cart-main panel">
+          <div class="cart-head">
+            <label class="check"><input type="checkbox" id="cart-check-all" /> 全选</label>
+            <span class="col-item">商品信息</span>
+            <span class="col-price">单价</span>
+            <span class="col-qty">数量</span>
+            <span class="col-sub">小计</span>
+            <span class="col-op">操作</span>
+          </div>
+          <div id="cart-list"></div>
+          <div class="empty" id="cart-empty" hidden>
+            <div class="empty-icon">🛒</div>
+            <p>购物车还是空的</p>
+            <button class="btn primary" data-nav="products">去挑选好物</button>
+          </div>
+        </div>
+        <aside class="cart-summary panel">
+          <h3>结算摘要</h3>
+          <div class="sum-row"><span>已选商品</span><strong id="sum-count">0 件</strong></div>
+          <div class="sum-row"><span>商品合计</span><strong id="sum-goods">¥0.00</strong></div>
+          <div class="sum-row"><span>运费</span><strong id="sum-ship">免运费</strong></div>
+          <div class="sum-total"><span>应付总额</span><strong id="sum-total">¥0.00</strong></div>
+          <button class="btn primary lg block" id="btn-checkout">去结算</button>
+          <p class="muted center">满 ¥99 包邮 · 支持邮件确认</p>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ========== 结算 ========== -->
+    <section id="view-checkout" class="view" hidden>
+      <div class="page-head"><h2>确认订单</h2></div>
+      <div class="checkout-layout">
+        <div class="panel form-panel">
+          <h3>收货信息</h3>
+          <label>收货人 <input id="ck-name" placeholder="姓名" /></label>
+          <label>确认 / 通知邮箱 <input id="ck-email" type="email" placeholder="you@example.com" required /></label>
+          <label>手机号 <input id="ck-phone" placeholder="选填" /></label>
+          <label>收货地址 <input id="ck-address" placeholder="省 / 市 / 区 / 详细地址" /></label>
+          <label>订单备注 <textarea id="ck-note" rows="2" placeholder="选填"></textarea></label>
+          <h3>支付方式</h3>
+          <div class="pay-methods">
+            <label class="pay-card selected"><input type="radio" name="pay" value="alipay" checked /><span>支付宝</span></label>
+            <label class="pay-card"><input type="radio" name="pay" value="wechat" /><span>微信支付</span></label>
+            <label class="pay-card"><input type="radio" name="pay" value="card" /><span>银行卡</span></label>
+          </div>
+          <p class="muted">演示环境模拟支付成功，并向邮箱发送发货确认（写入本地邮件日志）。</p>
+        </div>
+        <aside class="panel cart-summary">
+          <h3>订单商品</h3>
+          <div id="checkout-items"></div>
+          <div class="sum-row"><span>商品合计</span><strong id="ck-goods">¥0.00</strong></div>
+          <div class="sum-row"><span>运费</span><strong id="ck-ship">免运费</strong></div>
+          <div class="sum-total"><span>应付总额</span><strong id="ck-total">¥0.00</strong></div>
+          <button class="btn warn lg block" id="btn-pay">提交并付款</button>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ========== 订单 ========== -->
+    <section id="view-orders" class="view" hidden>
+      <div class="page-head">
+        <h2>我的订单</h2>
+        <div class="chip-row" id="order-tabs">
+          <button class="chip active" data-status="">全部</button>
+          <button class="chip" data-status="PENDING">待付款</button>
+          <button class="chip" data-status="PAID">待发货</button>
+          <button class="chip" data-status="SHIPPED">已发货</button>
+          <button class="chip" data-status="COMPLETED">已完成</button>
+          <button class="chip" data-status="CANCELLED">已取消</button>
+        </div>
+      </div>
+      <div class="order-list" id="order-list"></div>
+      <div class="empty" id="order-empty" hidden>
+        <div class="empty-icon">📦</div>
+        <p>暂无相关订单</p>
+        <button class="btn primary" data-nav="products">去逛逛</button>
+      </div>
+    </section>
+
+    <!-- ========== 登录 ========== -->
+    <section id="view-login" class="view auth-view" hidden>
+      <div class="auth-card panel">
+        <div class="auth-side">
+          <h2>欢迎回来</h2>
+          <p>登录后可加购、结算并查看订单状态。</p>
+          <ul>
+            <li>浏览 / 搜索全站商品</li>
+            <li>购物车与一键结算</li>
+            <li>订单历史与物流状态</li>
+          </ul>
+        </div>
+        <form class="form-panel" id="form-login">
+          <h3>账号登录</h3>
+          <label>用户名 <input id="login-username" autocomplete="username" placeholder="admin / shiguang / geek / alice" required /></label>
+          <label>密码 <input id="login-password" type="password" autocomplete="current-password" placeholder="123456" required /></label>
+          <button class="btn primary lg block" type="submit">登 录</button>
+          <p class="muted">还没有账号？<a href="#" data-nav="register">免费注册</a></p>
+          <div class="demo-box">
+            <span>顾客</span>
+            <button type="button" class="chip" data-demo="alice">alice</button>
+            <button type="button" class="chip" data-demo="bob">bob</button>
+            <span>商家</span>
+            <button type="button" class="chip" data-demo="shiguang">拾光</button>
+            <button type="button" class="chip" data-demo="geek">极客</button>
+            <button type="button" class="chip" data-demo="home">安居</button>
+            <button type="button" class="chip" data-demo="sport">悦动</button>
+            <button type="button" class="chip" data-demo="book">墨香</button>
+            <span>平台</span>
+            <button type="button" class="chip" data-demo="admin">admin 全站</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ========== 注册 ========== -->
+    <section id="view-register" class="view auth-view" hidden>
+      <div class="auth-card panel">
+        <div class="auth-side alt">
+          <h2>创建账号</h2>
+          <p>注册即成为拾光优选会员，开启品质购物。</p>
+          <ul>
+            <li>新客专属优惠</li>
+            <li>订单邮件实时同步</li>
+            <li>积分与售后保障</li>
+          </ul>
+        </div>
+        <form class="form-panel" id="form-register">
+          <h3>注册新账号</h3>
+          <label>用户名 <input id="reg-username" minlength="3" required placeholder="至少 3 位" /></label>
+          <label>密码 <input id="reg-password" type="password" minlength="6" required placeholder="至少 6 位" /></label>
+          <label>邮箱 <input id="reg-email" type="email" required placeholder="用于接收发货确认" /></label>
+          <label>昵称 <input id="reg-nickname" placeholder="选填" /></label>
+          <button class="btn primary lg block" type="submit">立即注册</button>
+          <p class="muted">已有账号？<a href="#" data-nav="login">去登录</a></p>
+        </form>
+      </div>
+    </section>
+
+    <!-- ========== 商家后台 ========== -->
+    <section id="view-admin" class="view" hidden>
+      <div class="admin-hero">
+        <div>
+          <p class="hero-kicker">SALES CONSOLE</p>
+          <h2 id="admin-shop-title">商家运营后台</h2>
+          <p class="muted">仅显示本店数据 · 商品 / 订单 / 报表</p>
+        </div>
+        <div class="admin-kpis" id="admin-kpis"></div>
+      </div>
+
+      <!-- 页签由 JS 按角色动态渲染：店长=商品/订单/统计/日志/邮件；平台管理员额外=数据分析/人员管理 -->
+      <div class="tabs" id="admin-tabs"></div>
+
+      <!-- 商品管理 -->
+      <div class="tab-panel" id="admin-products">
+        <div class="toolbar">
+          <input id="admin-q" type="search" placeholder="搜索商品名称 / 分类…" />
+          <button class="btn" id="btn-admin-search">查询</button>
+          <span class="flex-sp"></span>
+          <button class="btn" id="btn-cat-mgr">分类管理</button>
+          <button class="btn primary" id="btn-product-new">+ 添加商品</button>
+        </div>
+        <div class="table-wrap panel">
+          <table class="table" id="admin-product-table">
+            <thead>
+              <tr><th>ID</th><th>商品</th><th>价格</th><th>库存</th><th>分类</th><th>销量</th><th>状态</th><th style="width:160px">操作</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="pager">
+          <button class="btn" id="admin-page-prev">上一页</button>
+          <span id="admin-page-info">1</span>
+          <button class="btn" id="admin-page-next">下一页</button>
+        </div>
+      </div>
+
+      <!-- 订单管理 -->
+      <div class="tab-panel" id="admin-orders" hidden>
+        <div class="toolbar">
+          <select id="admin-order-status">
+            <option value="">全部状态</option>
+            <option value="PENDING">待付款</option>
+            <option value="PAID">待发货</option>
+            <option value="SHIPPED">已发货</option>
+            <option value="COMPLETED">已完成</option>
+            <option value="CANCELLED">已取消</option>
+          </select>
+          <button class="btn" id="btn-admin-order-search">查询</button>
+        </div>
+        <div class="table-wrap panel">
+          <table class="table" id="admin-order-table">
+            <thead>
+              <tr><th>订单号</th><th>用户</th><th>金额</th><th>商品</th><th>状态</th><th>收货人</th><th>时间</th><th style="width:180px">操作</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 销售统计 -->
+      <div class="tab-panel" id="admin-stats" hidden>
+        <div class="stat-grid" id="stats-overview"></div>
+        <div class="stat-cols">
+          <div class="panel">
+            <h3>近 7 日销售趋势</h3>
+            <div id="stats-daily" class="echart"></div>
+          </div>
+          <div class="panel">
+            <h3>热销商品 Top 8</h3>
+            <div id="stats-top" class="echart"></div>
+          </div>
+        </div>
+        <div class="panel" style="margin-top:16px">
+          <h3>分类销售贡献</h3>
+          <div id="stats-cat" class="echart"></div>
+        </div>
+        <div class="panel" style="margin-top:16px">
+          <h3>库存报表 <small class="muted">· 按库存升序，标红的为低库存（≤20）需补货</small></h3>
+          <div class="table-wrap">
+            <table class="table" id="stats-stock-table">
+              <thead><tr><th>商品</th><th>分类</th><th>库存</th><th>累计销量</th><th>状态</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 数据分析（平台管理员）：趋势预测 / 异常监控 / 排行榜 / 用户画像 -->
+      <div class="tab-panel" id="admin-analytics" hidden>
+        <div class="toolbar">
+          <div class="chip-row" id="ana-granularity">
+            <button class="chip active" data-g="day">按日</button>
+            <button class="chip" data-g="week">按周</button>
+            <button class="chip" data-g="month">按月</button>
+          </div>
+          <span class="flex-sp"></span>
+          <button class="btn" id="btn-export-orders">导出订单 CSV</button>
+          <button class="btn" id="btn-export-products">导出商品 CSV</button>
+        </div>
+
+        <div class="stat-grid" id="ana-kpis"></div>
+
+        <div class="panel" style="margin-top:16px">
+          <h3>实时销售监控
+            <button class="btn small" id="btn-ana-refresh" style="margin-left:8px">手动刷新</button>
+            <span class="muted" style="font-size:12px;margin-left:8px">每 20 秒自动刷新</span>
+          </h3>
+          <div id="ana-realtime"></div>
+        </div>
+
+        <div class="panel" style="margin-top:16px">
+          <h3>销售趋势与预测 <small class="muted" id="ana-trend-note"></small></h3>
+          <div id="ana-trend" class="echart-lg"></div>
+          <div class="eval-box" id="ana-eval"></div>
+        </div>
+
+        <div class="stat-cols" style="margin-top:16px">
+          <div class="panel">
+            <h3>销售异常判别（z-score ≥ 2）</h3>
+            <div id="ana-anomaly" class="echart"></div>
+            <div id="ana-anomaly-table"></div>
+          </div>
+          <div class="panel">
+            <h3>商品销售排行榜
+              <span class="chip-row" id="ana-rank-by" style="display:inline-flex;margin-left:8px">
+                <button class="chip active" data-by="qty">按销量</button>
+                <button class="chip" data-by="revenue">按销售额</button>
+              </span>
+            </h3>
+            <div id="ana-rank" class="echart"></div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:16px">
+          <h3>用户画像
+            <select id="ana-user" style="margin-left:8px"></select>
+          </h3>
+          <div id="ana-user-card"></div>
+          <div class="stat-cols" style="margin-top:12px">
+            <div>
+              <h4 class="sub-title">地域分布</h4>
+              <div id="ana-region" class="echart-sm"></div>
+            </div>
+            <div>
+              <h4 class="sub-title">购买力分层</h4>
+              <div id="ana-tier" class="echart-sm"></div>
+            </div>
+            <div>
+              <h4 class="sub-title">偏好分类（全站）</h4>
+              <div id="ana-pref" class="echart-sm"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 日志审计：登录 / 浏览 / 操作 -->
+      <div class="tab-panel" id="admin-logs" hidden>
+        <div class="toolbar">
+          <div class="chip-row" id="logs-tabs">
+            <button class="chip active" data-lt="logins">登录日志</button>
+            <button class="chip" data-lt="views">浏览行为</button>
+            <button class="chip" data-lt="ops">操作日志</button>
+          </div>
+          <span class="flex-sp"></span>
+          <button class="btn" id="btn-export-logs">导出当前日志 CSV</button>
+        </div>
+        <div class="muted" id="logs-scope-note" style="margin:8px 0"></div>
+        <div class="table-wrap panel">
+          <table class="table" id="logs-table">
+            <thead></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 人员管理（平台管理员）：销售人员 ID 管理 / 密码重置 -->
+      <div class="tab-panel" id="admin-staff" hidden>
+        <div class="toolbar">
+          <span class="muted">销售人员（店长）账号管理：添加 / 删除 / 密码重置</span>
+          <span class="flex-sp"></span>
+          <button class="btn primary" id="btn-staff-new">+ 添加销售人员</button>
+        </div>
+        <div class="table-wrap panel">
+          <table class="table" id="staff-table">
+            <thead><tr><th>ID</th><th>账号</th><th>昵称</th><th>所属店铺</th><th>邮箱</th><th style="width:220px">操作</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 邮件日志 -->
+      <div class="tab-panel" id="admin-mails" hidden>
+        <div class="table-wrap panel">
+          <table class="table" id="admin-mail-table">
+            <thead><tr><th>时间</th><th>收件人</th><th>主题</th><th>状态</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-grid">
+      <div>
+        <div class="logo small"><span class="logo-mark">拾</span><strong>拾光优选</strong></div>
+        <p class="muted">品质购物 · 极速履约 · 贴心售后</p>
+      </div>
+      <div>
+        <h4>顾客服务</h4>
+        <a href="#" data-nav="orders">订单查询</a>
+        <a href="#" data-nav="cart">购物车</a>
+        <a href="#" data-nav="products">全部商品</a>
+      </div>
+      <div>
+        <h4>商家服务</h4>
+        <a href="#" data-nav="admin">商家后台</a>
+        <a href="#" data-nav="admin">销售报表</a>
+      </div>
+      <div>
+        <h4>帮助</h4>
+        <p class="muted">密码均为 123456<br/>平台：admin（全站）<br/>商家：shiguang/geek/home/sport/book<br/>顾客：alice / bob</p>
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 拾光优选 · 品质购物演示站</div>
+  </footer>
+
+  <!-- 购物车抽屉 -->
+  <div class="drawer-mask" id="drawer-mask" hidden></div>
+  <aside class="drawer" id="cart-drawer" hidden>
+    <header class="drawer-head">
+      <h3>购物车</h3>
+      <button class="icon-btn" id="drawer-close" aria-label="关闭">✕</button>
+    </header>
+    <div class="drawer-body" id="drawer-items"></div>
+    <footer class="drawer-foot">
+      <div class="sum-total"><span>合计</span><strong id="drawer-total">¥0.00</strong></div>
+      <button class="btn primary lg block" id="drawer-checkout">去结算</button>
+    </footer>
+  </aside>
+
+  <!-- 商品编辑弹窗 -->
+  <dialog id="product-modal">
+    <form id="product-form" class="modal-form">
+      <h3 id="product-modal-title">添加商品</h3>
+      <input type="hidden" id="p-id" />
+      <div class="form-grid">
+        <label>名称 <input id="p-name" required /></label>
+        <label>价格 <input id="p-price" type="number" step="0.01" min="0.01" required /></label>
+        <label>库存 <input id="p-stock" type="number" min="0" required /></label>
+        <label>分类
+          <select id="p-category">
+            <option>数码</option><option>外设</option><option>家电</option><option>运动</option><option>图书</option><option>家居</option>
+          </select>
+        </label>
+        <label>所属店铺
+          <select id="p-shop"></select>
+        </label>
+        <label>商品图片
+          <input type="file" id="p-image-file" accept="image/*" />
+          <input type="hidden" id="p-image" />
+          <div class="img-upload" id="p-image-preview"><span class="muted">未选择图片</span></div>
+        </label>
+        <label class="span2">描述 <textarea id="p-desc" rows="3"></textarea></label>
+        <label>状态
+          <select id="p-status"><option value="1">上架</option><option value="0">下架</option></select>
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn" id="btn-product-cancel">取消</button>
+        <button type="submit" class="btn primary">保存</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- 商品快速预览 -->
+  <dialog id="quick-modal">
+    <div class="quick-body" id="quick-body"></div>
+  </dialog>
+
+  <div class="confirm-mask" id="confirm-mask" hidden>
+    <div class="confirm-box" role="dialog" aria-modal="true">
+      <h3 id="confirm-title">确认操作</h3>
+      <p id="confirm-message"></p>
+      <div class="confirm-actions">
+        <button type="button" class="btn confirm-cancel" id="confirm-cancel">取消</button>
+        <button type="button" class="btn confirm-ok" id="confirm-ok">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 添加销售人员弹窗 -->
+  <dialog id="staff-modal">
+    <form id="staff-form" class="modal-form">
+      <h3>添加销售人员</h3>
+      <div class="form-grid">
+        <label>登录账号 <input id="s-username" minlength="3" required placeholder="如 seller01" /></label>
+        <label>初始密码 <input id="s-password" minlength="6" required placeholder="至少 6 位" /></label>
+        <label>昵称 <input id="s-nickname" placeholder="选填" /></label>
+        <label>所属店铺
+          <select id="s-shop"></select>
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn" id="btn-staff-cancel">取消</button>
+        <button type="submit" class="btn primary">保存</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- 密码重置弹窗 -->
+  <dialog id="pwd-modal">
+    <form id="pwd-form" class="modal-form">
+      <h3 id="pwd-title">重置密码</h3>
+      <input type="hidden" id="pwd-user-id" />
+      <label style="display:block;margin-top:8px">新密码 <input id="pwd-new" minlength="6" required placeholder="至少 6 位" /></label>
+      <div class="modal-actions">
+        <button type="button" class="btn" id="btn-pwd-cancel">取消</button>
+        <button type="submit" class="btn primary">确认重置</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- 商品类别管理弹窗 -->
+  <dialog id="cat-modal">
+    <form id="cat-form" class="modal-form">
+      <h3>商品类别管理</h3>
+      <div id="cat-list" class="cat-list"></div>
+      <div class="modal-actions" style="margin-top:12px">
+        <input id="cat-new" placeholder="新类别名称，如：母婴" />
+        <button type="submit" class="btn primary">+ 添加类别</button>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn" id="btn-cat-close">关闭</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <script src="assets/vendor/echarts.min.js"></script>
+  <script src="js/analytics.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    (function () {
+      function clean() {
+        document.querySelectorAll('[data-aigc-mark]').forEach(function (el) { el.remove(); });
+        document.querySelectorAll('body > p').forEach(function (el) {
+          if ((el.textContent || '').trim() === 'AI生成') el.remove();
+        });
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', clean);
+      } else {
+        clean();
+      }
+    })();
+  </script>
+</body>
+</html>
